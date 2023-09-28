@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Front-end [ Programador-Camisa-10 ] blazor-view-dotnet7</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <!--NavMenu é um componente de meu -> tudo que colocarmos
+         no arquivo NavMenu.razor, este componente "renderiza"-->
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://www.desenvolvedorwoto.com.br/contato/" target="_blank">Fale comigo</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

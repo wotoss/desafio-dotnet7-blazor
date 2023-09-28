@@ -1,0 +1,77 @@
+<!--minha pagina se chama clientes-->
+<!--eu digitando na url clientes e vem para esta pagina-->
+@page "/clientes/novo"
+<!--componente para formulario do blazor-->
+@using Microsoft.AspNetCore.Components.Forms
+@using Data.Models
+@using Data.Servicos
+<!--quando fazemos o (inject ele cria uma instância) daí conseguimos usar o serviço (ForecastService) -->
+@inject ClienteServico ClienteServico
+<!--Componente para usar o (alert) do (JavaScript - JsRuntime)-->
+@inject IJSRuntime JsRuntime;
+<!--este componente (navManager) envia a pagina para uma outra rota-->
+@inject NavigationManager NavManager;
+
+
+<!--aqui eu já tenho o titulo da pagina-->
+<PageTitle>Novo Cliente </PageTitle>
+
+<h2 style="color: blue;">Cadastrando clientes - [ Programador-Camisa-10 ]</h2>
+
+<hr>
+<!--vou montar um navlink para fazer o href ou link botão cancelar-->
+ <NavLink class="btn btn-default" href="clientes">
+     Cancelar 
+ </NavLink>
+<hr>
+
+<!--este edite form é um objeto do proprio balzor-->
+<!--
+    1º eu tenho o fomulário edite-form
+    2º depois o botão 
+    3º EditForm => irá transformar meu formulário em html
+    4º Model="@clientes" => estou usando as propriedades da struct ou classe cliente
+    5º OnSubmit="@HandleSubmit" => esta é a minha ação.
+    6º  <InputText id="nome" @bind-Value="clientes.Nome" />
+    6º a => ao digitar dados no meu input nome ele sincroniza ou faz 
+    6º b => o bind com a struct cliente.nome
+-->
+
+<EditForm Model="@cliente" OnSubmit="@HandleValidSubmit">    
+  <Form Cliente="@cliente" Mensagem="@mensagem" />  
+</EditForm>
+
+@code {
+
+    private async Task HandleValidSubmit()
+    {
+        await ClienteServico.Incluir(cliente);
+
+        //estratégia (1) usando (alert)
+        await JsRuntime.InvokeVoidAsync("alert", "Cadastro realizado com sucesso - via javaScript");
+
+        //estratégia (2) mensagem na tela de sucesso
+        mensagem = "Cadastro realizado com sucesso";
+
+        //estratégia 3 (navegar para outro local)
+        NavManager.NavigateTo("/clientes");
+
+        //após ter feito o cadastro, monto uma nova 
+        //instância que limpa a minha tela.
+        cliente = new Cliente();
+        //um sleep ou atraso.
+        //Thread.Sleep(2000);
+        //depois do sleep eu limpo a mensagem.
+        //mensagem = string.Empty;
+    }
+
+    //veja a montagem de um mensagem
+    //1º passo a criação da string
+    private string mensagem = string.Empty;
+
+    //este é o código que eu farei do blazor
+    //colocando o new na frente da propriedade eu acabei de criar uma 
+    //instância de cliente
+    private Cliente cliente = new Cliente();
+   
+}

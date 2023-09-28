@@ -1,0 +1,102 @@
+<!--minha pagina se chama clientes-->
+<!--eu digitando na url clientes e vem para esta pagina-->
+@page "/clientes"
+@using Data.Models
+@using Data.Servicos
+<!--quando fazemos o (inject ele cria uma instância) daí conseguimos usar o serviço (ForecastService) -->
+@inject ClienteServico ClienteServico
+<!--para uso do java script (JsRuntime)-->
+@inject IJSRuntime JsRuntime
+
+<!--aqui eu já tenho o titulo da pagina-->
+<PageTitle>Lista de Clientes</PageTitle>
+
+<h1>Lista de clientes</h1>
+<hr>
+<!--vou montar um navlink para fazer o href ou link botão novo-->
+ <NavLink class="btn btn-primary" href="/clientes/novo">
+    <span class="oi oi-plus" aria-hidden="true"></span> Novo 
+ </NavLink>
+<hr>
+
+
+
+<!--a forma que se faz um if no razor-->
+<!--toda vez que temos o @a-->
+<!--com dotnet7 eu posso usar o (is null)-->
+<!--ao invês de (== null)-->
+<!--se for nullo ele entra no if e da (Loading carregando)--> 
+@if (clientes is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Data de criação</th>
+                <th class="2"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes)
+            {
+                <tr>
+                    <td>@cliente.Id</td>
+                    <td>@cliente.Nome</td>
+                    <td>@cliente.Telefone</td>
+                    <td>@cliente.Email</td>
+                    <td>@cliente.DataCriacao.ToString("dd/mm/yyyy HH:MM:ss")</td>
+                    <td>
+                        @*Estou fazendo o editar passando o id pela url*@                
+                        <a class="btn btn-primary" href="/clientes/@cliente.Id/editar">
+                            <span class="oi oi-edit" aria-hidden="true"></span> Editar 
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <button class="btn btn-danger" @onclick="()=>Excluir(cliente)">Apagar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!--este é o código que eu farei do blazor-->
+@code {
+    private Cliente[]? clientes;
+
+
+    private async Task Excluir(Cliente cliente)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm","confirma?");
+       //por padrão ele só entra no if se for (true)
+       //se eu (cancelar) é (falso) ele não entra     
+        if(confirmed)
+       { 
+      //neste eu excluo os cliente
+       await ClienteServico.Excluir(cliente);
+      //e logo em seguida eu recarrego os cliente
+       await CarregaCliente();
+       }  
+    }
+
+    //vamos fazer um método para carregamento de clientes
+    private async Task CarregaCliente()
+    {
+        clientes = await ClienteServico.Todos();
+    }
+   
+   //ao inicializar o componente (OnInitializedAsync) eu utilizar o meu
+   //(ClienteServico.Todos) trazendo a lista caso haja
+    protected override async Task OnInitializedAsync()
+    {
+       await CarregaCliente();
+    }
+}

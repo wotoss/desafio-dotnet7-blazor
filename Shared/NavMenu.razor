@@ -1,0 +1,47 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">[ Programador-Camisa-10 ]</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <!--quando renderiza ele faz um href -->
+        <!--quando você esta usando o conceito de single-page-aplication-->
+        <!--ao invês dele dá um reload na tela ele usa o ajax em js-->
+        <!--faz um fetch no (java script)-->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="clientes">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Listar Clientes
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+/*
+  28-09-2023
+  repare que este ToggleNavMenu => quando clicamos ele abre e fecha a tela
+  este menu (toggle) nomalmente é feito em (java Script) aqui fazemos em C# 
+  Resumo 
+  Feito em (C#) e ele converte em (JavaScript).
+  Então o blazor faz a compilação do que vc fez em C# em codigo JavaScript para 
+  que seja compativel com a maioria dos navegadores.
+*/
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

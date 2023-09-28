@@ -1,0 +1,52 @@
+
+@using blazor_view_dotnet7.Data.Models;
+<div>
+    <label for="nome">Nome</label>
+    <InputText id="nome" class="form-control" @bind-Value="Cliente.Nome" />
+</div>
+
+<div>
+    <label for="telefone">Telefone</label>
+    <InputText id="telefone" class="form-control" @bind-Value="Cliente.Telefone" />
+</div>
+
+<div>
+    <label for="email">Email</label>
+    <InputText  type="email" id="email" class="form-control" @bind-Value="Cliente.Email" />
+</div>
+
+<DataAnnotationsValidator />
+    <ValidationSummary />
+
+<!--fazendo a validação para mostrar a msg-->
+@if(!string.IsNullOrEmpty(Mensagem)){   
+<br>
+//2º passo pegar o alerte neste caso bootstrap
+    <div class="alert alert-success" role="alert">
+      Cadastro efetuado com sucesso
+    </div>
+}
+
+<div class="botao_form">
+    <button type="submit">Enviar</button>
+</div>
+
+@code{
+  /*
+      veja a montagem de um mensagem
+      1º passo a criação da string
+      detalhe: Parameter é uma propriedade então precisa { get; set; }
+      lembrando: que propriedade é publica então padrão PascalCase
+    */
+    [Parameter]
+    public string? Mensagem { get; set; } 
+
+    
+    //este é o código que eu farei do blazor
+    //colocando o new na frente da propriedade eu acabei de criar uma 
+    //instância de cliente
+    //não pode ser nulo default!;
+    //lembrando: que propriedade é publica então padrão PascalCase
+    [Parameter]
+    public Cliente Cliente { get; set; } = default!;
+}

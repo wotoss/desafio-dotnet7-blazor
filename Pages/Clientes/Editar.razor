@@ -1,0 +1,116 @@
+<!--minha pagina se chama clientes-->
+<!--eu digitando na url clientes e vem para esta pagina-->
+<!--como o Id é um parametro vou coloca-lo como maisculo-->
+@page "/clientes/{Id:int}/editar"
+
+<!--componente para formulario do blazor-->
+@using Microsoft.AspNetCore.Components.Forms
+@using Data.Models
+@using Data.Servicos
+<!--quando fazemos o (inject ele cria uma instância) daí conseguimos usar o serviço (ForecastService) -->
+@inject ClienteServico ClienteServico
+<!--Componente para usar o (alert) do (JavaScript - JsRuntime)-->
+@inject IJSRuntime JsRuntime;
+<!--este componente (navManager) envia a pagina para uma outra rota-->
+@inject NavigationManager NavManager;
+
+<!--este @if é a programação defensiva se este cliente não for nullo -->
+<!--ele inicia a edição-->
+@if(@cliente is not null){
+/*no titulo da pagina eu passo no nome do cliente que estou editando*/
+<PageTitle>Editando registro do cliente: @cliente.Nome</PageTitle>
+
+<h2 style="color: blue;">Editando registro do cliente: @cliente.Nome</h2>
+
+<hr>
+
+/*este botão cancelar esta (navegando - navlink) para clientes*/
+ <NavLink class="btn btn-default" href="clientes">
+     Cancelar 
+ </NavLink>
+<hr>
+
+/*este edite form é um objeto do proprio balzor*/
+/*
+    1º eu tenho o fomulário edite-form
+    2º depois o botão 
+    3º EditForm => irá transformar meu formulário em html
+    4º Model="@clientes" => estou usando as propriedades da struct ou classe cliente
+    5º OnSubmit="@HandleSubmit" => esta é a minha ação.
+    6º  <InputText id="nome" @bind-Value="clientes.Nome" />
+    6º a => ao digitar dados no meu input nome ele sincroniza ou faz 
+    6º b => o bind com a struct cliente.nome
+    */
+
+<EditForm Model="@cliente" OnSubmit="@HandleValidSubmit">
+  <Form Cliente="@cliente" Mensagem="@mensagem" />    
+</EditForm>
+
+} else {
+    //posso ir no bootstrap mensagem e "decorar"
+    <h1>Cliente informado pelo ID: (@Id) não localizado</h1>
+
+}
+@code {
+
+    /*
+    1º passo
+      ele vai pegar a informação que esta vindo na url (@page "/clientes/{Id:int}/editar")
+      que esta no inicio desta pagina e vai preencher esta propriedade {get; set;}
+    */
+    [Parameter]
+    public int Id { get; set; }
+
+    //2º passo 
+    /*
+      vou fazer um override do init para quando carregar a minha pagina 
+      desta forma eu dou um Getliente(Id) e busco o cliente pelo (Id)
+    */
+    protected override async Task OnInitializedAsync()
+    {
+        this.cliente = await ClienteServico.BuscarPorId(Id);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        //este (if) é a programação defensiva 
+        if (cliente is null)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Não é possível atualizar um cliente inexistente - via javaScript");
+            //este return tira o erro dos (cliente).
+            return;
+        }
+        await ClienteServico.Atualizar(cliente);
+
+        //estratégia (1) usando (alert)
+        await JsRuntime.InvokeVoidAsync("alert", "Atualizado com sucesso - via javaScript");
+
+        //estratégia (2) mensagem na tela de sucesso
+        mensagem = "Atualização realizada com sucesso";
+
+        //estratégia 3 (navegar para outro local)
+        NavManager.NavigateTo("/clientes");
+
+        //um sleep ou atraso.
+        //Thread.Sleep(2000);
+        //depois do sleep eu limpo a mensagem.
+        //mensagem = string.Empty;
+    }
+
+      /*
+      veja a montagem de um mensagem
+      1º passo a criação da string
+      detalhe: Parameter é uma propriedade então precisa { get; set; }
+      lembrando: que propriedade é publica então padrão PascalCase
+    */
+    
+    private string mensagem  = string.Empty;
+
+    
+    //este é o código que eu farei do blazor
+    //colocando o new na frente da propriedade eu acabei de criar uma 
+    //instância de cliente
+    //não pode ser nulo default!;  
+    public Cliente? cliente  = null;
+    
+}
