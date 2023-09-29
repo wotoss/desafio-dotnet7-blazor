@@ -29,7 +29,15 @@ public class ClienteServico
     {
       return await http.GetFromJsonAsync<Cliente?>($"{Configuracao.Host}/clientes/{id}");      
     }
+     /*
+       IMPORTANTISSIMO
+       Eu poderia fazer conexão com (entity-framework ou dapper, SQL-ADO-connection) aqui no blazor
+       ou seja me conectar a (base de dados) daqui mesmo através do blazor.
+       Porque o (blazor) tem renderização via (server side e cliente side)
 
+       *Com o blazor nos conseguimos (com react não com vuejs não com angular não, com o next tambem não)
+       *Todos estes não tem integração com o C#
+     */
     public async Task Incluir(Cliente cliente)
     {
       await http.PostAsJsonAsync<Cliente>($"{Configuracao.Host}/clientes", cliente);      
