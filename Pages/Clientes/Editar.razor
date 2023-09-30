@@ -10,9 +10,11 @@
 <!--quando fazemos o (inject ele cria uma instância) daí conseguimos usar o serviço (ForecastService) -->
 @inject ClienteServico ClienteServico
 <!--Componente para usar o (alert) do (JavaScript - JsRuntime)-->
-@inject IJSRuntime JsRuntime;
+@inject IJSRuntime JsRuntime
 <!--este componente (navManager) envia a pagina para uma outra rota-->
-@inject NavigationManager NavManager;
+@inject NavigationManager NavManager
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage
 
 <!--este @if é a programação defensiva se este cliente não for nullo -->
 <!--ele inicia a edição-->
@@ -61,6 +63,19 @@
     [Parameter]
     public int Id { get; set; }
 
+    private string? token { get; set; }
+
+    //antes de renderizar a minha pagina eu verei se tem o login ou não
+    //antes de renderizar a minha pagina eu faço a verificação de login
+    //verifico se veio o token se não veio eu redireciono
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+      //se minha pagina foi renderizada
+       if(firstRender)
+          await AdministradorServico.RedirectLoginSeNaoLogado(BrowserStorage, NavManager);
+       
+    }
+
     //2º passo 
     /*
       vou fazer um override do init para quando carregar a minha pagina 
@@ -68,7 +83,11 @@
     */
     protected override async Task OnInitializedAsync()
     {
-        this.cliente = await ClienteServico.BuscarPorId(Id);
+        //recebo o meu token e preciso passar ele na BuscarPorId(Id, token);
+        token = await AdministradorServico.GetToken(BrowserStorage);
+        //se vier (vazio ou nullo) ele  retorna
+        if(string.IsNullOrEmpty(token)) return;
+        this.cliente = await ClienteServico.BuscarPorId(Id, token);
     }
 
     private async Task HandleValidSubmit()
@@ -80,7 +99,7 @@
             //este return tira o erro dos (cliente).
             return;
         }
-        await ClienteServico.Atualizar(cliente);
+        await ClienteServico.Atualizar(cliente, token);
 
         //estratégia (1) usando (alert)
         await JsRuntime.InvokeVoidAsync("alert", "Atualizado com sucesso - via javaScript");

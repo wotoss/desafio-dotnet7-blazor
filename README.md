@@ -22,6 +22,10 @@ dotnet run
 # Com o blazor nos conseguimos (com react não com vuejs não com angular não, com o next tambem não)
 # Todos estes não tem integração com o C#
 #
+# Outros Detalhe não precisei => liberar cross domain
+# porque a minha aplicação roda via (server side).
+# normalmente quando uso (api) eu preciso (liberar o cross-domain).
+# com (Razor) não preciso.
 # ====================================================================================
      
 

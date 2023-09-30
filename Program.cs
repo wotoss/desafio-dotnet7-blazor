@@ -17,6 +17,7 @@ injeção de depêndencia @using Data.Servicos lá no index.razor
 seria (new ClienteServico()) e  instânciar o meu objeto
 */
 builder.Services.AddSingleton<ClienteServico>();
+builder.Services.AddSingleton<AdministradorServico>();
 
 //este builder.Configuration ira no meu appsettings e pegará 
 //o meu nó HOST que eu criei

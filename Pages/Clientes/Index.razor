@@ -7,6 +7,9 @@
 @inject ClienteServico ClienteServico
 <!--para uso do java script (JsRuntime)-->
 @inject IJSRuntime JsRuntime
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage
+@inject NavigationManager NavManager
 
 <!--aqui eu já tenho o titulo da pagina-->
 <PageTitle>Lista de Clientes</PageTitle>
@@ -81,7 +84,7 @@ else
         if(confirmed)
        { 
       //neste eu excluo os cliente
-       await ClienteServico.Excluir(cliente);
+       await ClienteServico.Excluir(cliente, token);
       //e logo em seguida eu recarrego os cliente
        await CarregaCliente();
        }  
@@ -90,13 +93,31 @@ else
     //vamos fazer um método para carregamento de clientes
     private async Task CarregaCliente()
     {
-        clientes = await ClienteServico.Todos();
+        clientes = await ClienteServico.Todos(token);
+    }
+
+    
+    //antes de renderizar a minha pagina eu verei se tem o login ou não
+    //antes de renderizar a minha pagina eu faço a verificação de login
+    //verifico se veio o token se não veio eu redireciono
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+      //se minha pagina foi renderizada
+       if(firstRender)
+          await AdministradorServico.RedirectLoginSeNaoLogado(BrowserStorage, NavManager);
+       
     }
    
    //ao inicializar o componente (OnInitializedAsync) eu utilizar o meu
    //(ClienteServico.Todos) trazendo a lista caso haja
+   private string? token { get; set; }
     protected override async Task OnInitializedAsync()
     {
-       await CarregaCliente();
+        //recebo o meu token e preciso passar ele na BuscarPorId(Id, token);
+        token = await AdministradorServico.GetToken(BrowserStorage);
+        //como ele entra neste index primeiro então
+        //se vier (vazio ou nullo) ele não carrega os cliente e retorna
+        if(string.IsNullOrEmpty(token)) return;
+        await CarregaCliente();
     }
 }

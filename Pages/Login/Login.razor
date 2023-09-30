@@ -1,0 +1,60 @@
+@page "/login"
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
+@using Data.DTOs
+@using Data.Servicos
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage 
+@inject AdministradorServico AdministradorServico
+
+<!--aqui eu estou usando o formulário em html-->
+<form @onsubmit="HandleValidSubmit">
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" class="form-control" id="email" @bind="login.Email" aria-describedby="emailHelp" placeholder="digite o email" >
+  </div>
+
+  <div class="form-group" style="margin-top: 10px;">
+    <label for="senha">Senha</label>
+    <input type="password" class="form-control" id="senha" @bind="login.Senha" placeholder="digite a senha" />
+  </div>
+  <br>
+  <button type="submit" class="btn btn-primary">Logar</button>
+</form>
+
+@code{
+    //fiz uma nova instância de LoginDTO
+    private LoginDTO login = new();
+
+    private async Task HandleValidSubmit()
+    {
+        //se no formulário acima não for preenchido o (input email ou senha)
+        //ele nem faz a requisição, já envia o alert.
+        if (string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Senha))
+        {
+           await JsRuntime.InvokeVoidAsync("alert", "Email e Senha são obrigatórias");
+           return;
+        }
+        var adm = await AdministradorServico.LoginAsync(login);
+        //se usuário vier nullo por não ter encontrado na (base de dados)
+        //exibimos o alert em (js ou seja JsRuntime)
+        if(adm is null)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Email ou senha inválidos");
+            return;
+        }
+        //caso ele encontre na (base de dados) o usuário.
+        //nós começamos a trabalhar com (storage). 
+        //ele vai gravar o dado no  meu localStorage
+        //Lembrando que todo navegador tem uma "base de dados" pequena chamado
+        //LocalStorage
+        //Faço o parse Serialize e passo ele para o (admLogado)
+        // e ficará guardado no localStotrage
+        await BrowserStorage.SetAsync("admLogado", JsonSerializer.Serialize(adm));
+
+        //após ele ter amazenado as informações do usuário no localStorage 
+        //eu vou fazer o redirect para pagina (clentes) usando o (navManager)
+        NavManager.NavigateTo("/clientes");
+    }
+}

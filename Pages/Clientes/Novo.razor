@@ -10,7 +10,9 @@
 <!--Componente para usar o (alert) do (JavaScript - JsRuntime)-->
 @inject IJSRuntime JsRuntime;
 <!--este componente (navManager) envia a pagina para uma outra rota-->
-@inject NavigationManager NavManager;
+@inject NavigationManager NavManager
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage
 
 
 <!--aqui eu já tenho o titulo da pagina-->
@@ -45,7 +47,7 @@
 
     private async Task HandleValidSubmit()
     {
-        await ClienteServico.Incluir(cliente);
+        await ClienteServico.Incluir(cliente, token);
 
         //estratégia (1) usando (alert)
         await JsRuntime.InvokeVoidAsync("alert", "Cadastro realizado com sucesso - via javaScript");
@@ -73,5 +75,25 @@
     //colocando o new na frente da propriedade eu acabei de criar uma 
     //instância de cliente
     private Cliente cliente = new Cliente();
+
+    //antes de renderizar a minha pagina eu verei se tem o login ou não
+    //antes de renderizar a minha pagina eu faço a verificação de login
+    //verifico se veio o token se não veio eu redireciono
+     private string? token { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+      //se minha pagina foi renderizada
+       if(firstRender)
+          await AdministradorServico.RedirectLoginSeNaoLogado(BrowserStorage, NavManager);
+       
+    }
+
+  
+    protected override async Task OnInitializedAsync()
+    {
+        //recebo o meu token e preciso passar ele na BuscarPorId(Id, token);
+        token = await AdministradorServico.GetToken(BrowserStorage);
+        
+    }
    
 }
